@@ -19,11 +19,9 @@ class GameScene: SKScene {
     let boardHeight: CGFloat = 724 // 棋盤高度
     let numberOfRows = 3 // 棋盤行數
     let numberOfColumns = 3 // 棋盤列數
-    var oQueue: [(row: Int, col: Int)] = []
-    var xQueue: [(row: Int, col: Int)] = []
-
-
-
+    var oQueue: [(node:SKSpriteNode,row: Int, col: Int)] = []
+    var xQueue: [(node:SKSpriteNode,row: Int, col: Int)] = []
+    
     override func didMove(to view: SKView) {
         // 設置背景
         setupGameBoard()
@@ -31,75 +29,66 @@ class GameScene: SKScene {
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        
-        if gameIsOver
-        {
-            let newScene = GameScene(size: self.size)
-            newScene.scaleMode = .fill
-            //view?.presentScene(newScene,transition:SKTransition.flipHorizontal(withDuration: 0.5))
+
+        if gameIsOver {
             resetGameState()
-            oPositions = Array(repeating: Array(repeating: false, count: numberOfRows), count: numberOfColumns)
-            xPositions = Array(repeating: Array(repeating: false, count: numberOfRows), count: numberOfColumns)
-            
             setupGameBoard()
             return
         }
-        let location = touch.location(in: boardNode)  // 計算觸摸位置相對於 boardNode
 
-        print("Touch location in boardNode: \(location)")
+        let location = touch.location(in: boardNode)
         if 0 <= location.x && location.x < boardNode.size.width && 0 <= location.y && location.y < boardNode.size.height {
             let column = Int(location.x / 222)
             let row = Int(location.y / 222)
-            let centerX = CGFloat(column) * 222 + 111
-            let centerY = CGFloat(row) * 222 + 111
-            if(oPositions[row][column] == true||xPositions[row][column] == true)
-            {//如果那格已經有棋子了
-                return
+
+            if oPositions[row][column] || xPositions[row][column] {
+                return  // 如果该位置已经有棋子，则不进行任何操作
             }
 
             let imageName = (numberOfTouches % 2 == 0) ? "X.png" : "O.png"
-            //用第幾次碰觸來判斷是Ｘ回合還是Ｏ回合
             let sprite = SKSpriteNode(imageNamed: imageName)
-            sprite.position = CGPoint(x: centerX, y: centerY)
-            sprite.zPosition = CGFloat(numberOfTouches)
-            boardNode.addChild(sprite)//放棋子
-            if(numberOfTouches%2 == 0&&xCount<=3)
-            {
+            sprite.position = CGPoint(x: CGFloat(column) * 222 + 111, y: CGFloat(row) * 222 + 111)
+            boardNode.addChild(sprite)
+
+            if imageName == "X.png" {
                 xPositions[row][column] = true
-                xCount+=1
-            }
-            else if(numberOfTouches%2 == 1&&oCount<=3)
-            {
+                xQueue.append((node: sprite, row: row, col: column))
+                if xQueue.count > 3 {
+                    erase(for: "X")  // 删除最早的棋子
+                }
+            } else {
                 oPositions[row][column] = true
-                oCount+=1
+                oQueue.append((node: sprite, row: row, col: column))
+                if oQueue.count > 3 {
+                    erase(for: "O")  // 删除最早的棋子
+                }
             }
-            else
-            {
-                
-            }
+
             numberOfTouches += 1
-        }
-        if checkForWin(xPositions)||checkForWin(oPositions) {
-            print("\(((numberOfTouches % 2) == 0) ? "O" : "X") wins!")
-            self.isPaused = true;
-            endGame(winner: numberOfTouches%2 == 0 ?"O":"X")
-            
-            // 可以在这里执行一些游戏结束的逻辑，比如显示胜利信息，禁止进一步触摸等
+
+            if checkForWin(xPositions) || checkForWin(oPositions) {
+                endGame(winner: imageName == "X.png" ? "X" : "O")
+            }
         }
     }
+
     func erase(for player: String)
     {
         var queue = player == "O" ? oQueue : xQueue
         var positions = player == "O" ? oPositions : xPositions
-        
         if queue.count > 3 {
             let oldest = queue.removeFirst()  // 移除并获取最早的棋子位置
-            positions[oldest.row][oldest.col] = false  // 在棋盘上标记为未占据
+            let spaceSprite = SKSpriteNode(imageNamed: "Space.png")
+            spaceSprite.position = oldest.node.position
+            spaceSprite.zPosition = oldest.node.zPosition
+            boardNode.addChild(spaceSprite)
             
+            positions[oldest.row][oldest.col] = false  // 在棋盘上标记为未占据
+            oldest.node.removeFromParent()
         }
         if player == "O" {
-                oQueue = queue
-                oPositions = positions
+            oQueue = queue
+            oPositions = positions
         }
         else {
             xQueue = queue
@@ -163,13 +152,9 @@ class GameScene: SKScene {
          oCount=0
          xCount=0
          gameIsOver = false
-            /*
-        oPositions = false
-        xPositions = false*/
         
         // 重新设置棋盘
     }
-
 
     func checkForWin(_ positions: [CGPoint]) -> Bool {
         // 實現勝利條件判斷的邏輯（需要詳細規劃）
@@ -205,15 +190,7 @@ class GameScene: SKScene {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        // 當觸摸移動時觸發
-        /*
-        guard let touch = touches.first else { return }
-            
-            // 獲取觸摸點的位置
-            let location = touch.location(in: self)
-            
-        print("Touch moved to \(location)")*/
-
+        
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
