@@ -7,10 +7,10 @@ class GameScene: SKScene {
     var numberOfTouches = 0
     var helloLabel: SKLabelNode!
     var background: SKSpriteNode!
-    var column=0
-    var row=0
-    var oCount=0
-    var xCount=0
+    var column = 0
+    var row = 0
+    var oCount = 0
+    var xCount = 0
     var gameIsOver = false
     var oPositions: [[Bool]] = Array(repeating: Array(repeating: false, count: 3), count: 3)
     var xPositions: [[Bool]] = Array(repeating: Array(repeating: false, count: 3), count: 3)
@@ -19,14 +19,14 @@ class GameScene: SKScene {
     let boardHeight: CGFloat = 724 // 棋盤高度
     let numberOfRows = 3 // 棋盤行數
     let numberOfColumns = 3 // 棋盤列數
-    var oQueue: [(node:SKSpriteNode,row: Int, col: Int)] = []
-    var xQueue: [(node:SKSpriteNode,row: Int, col: Int)] = []
-    
+    var oQueue: [(node: SKSpriteNode, row: Int, col: Int)] = []
+    var xQueue: [(node: SKSpriteNode, row: Int, col: Int)] = []
+
     override func didMove(to view: SKView) {
         // 設置背景
         setupGameBoard()
-        
     }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
 
@@ -50,153 +50,154 @@ class GameScene: SKScene {
             sprite.position = CGPoint(x: CGFloat(column) * 222 + 111, y: CGFloat(row) * 222 + 111)
             boardNode.addChild(sprite)
 
+            // 添加标签
+            let label = SKLabelNode(text: "\(1)")
+            label.fontSize = 20
+            label.fontColor = .black
+            label.horizontalAlignmentMode = .left
+            label.verticalAlignmentMode = .top
+            label.position = CGPoint(x: -sprite.size.width / 2 + 10, y: sprite.size.height / 2 - 10)
+            label.zPosition = CGFloat(numberOfTouches+1)
+            sprite.addChild(label)
+
             if imageName == "X.png" {
                 xPositions[row][column] = true
                 xQueue.append((node: sprite, row: row, col: column))
+                xCount += 1
                 if xQueue.count > 3 {
                     erase(for: "X")  // 删除最早的棋子
                 }
             } else {
                 oPositions[row][column] = true
                 oQueue.append((node: sprite, row: row, col: column))
+                oCount += 1
                 if oQueue.count > 3 {
                     erase(for: "O")  // 删除最早的棋子
                 }
             }
 
+            updateLabels()
+
             numberOfTouches += 1
 
-            if checkForWin(xPositions) || checkForWin(oPositions) {
-                endGame(winner: imageName == "X.png" ? "X" : "O")
+            if checkForWin(xPositions) {
+                endGame(winner: "X")
+            } else if checkForWin(oPositions) {
+                endGame(winner: "O")
             }
         }
     }
 
-    func erase(for player: String)
-    {
+    func updateLabels() {
+        for (index, element) in xQueue.enumerated() {
+            if let label = element.node.children.first as? SKLabelNode {
+                label.text = "\(index + 1)"
+            }
+        }
+        
+        for (index, element) in oQueue.enumerated() {
+            if let label = element.node.children.first as? SKLabelNode {
+                label.text = "\(index + 1)"
+            }
+        }
+    }
+
+    func erase(for player: String) {
         var queue = player == "O" ? oQueue : xQueue
         var positions = player == "O" ? oPositions : xPositions
+
         if queue.count > 3 {
             let oldest = queue.removeFirst()  // 移除并获取最早的棋子位置
-            let spaceSprite = SKSpriteNode(imageNamed: "Space.png")
-            spaceSprite.position = oldest.node.position
-            spaceSprite.zPosition = oldest.node.zPosition
-            boardNode.addChild(spaceSprite)
             
             positions[oldest.row][oldest.col] = false  // 在棋盘上标记为未占据
             oldest.node.removeFromParent()
         }
+
         if player == "O" {
             oQueue = queue
             oPositions = positions
-        }
-        else {
+        } else {
             xQueue = queue
             xPositions = positions
         }
+        
+        updateLabels()
     }
+
     func checkForWin(_ positions: [[Bool]]) -> Bool {
         // 检查行
         for row in positions {
             if row.allSatisfy({ $0 == true }) {
-                print("game over橫線")
                 return true
             }
         }
 
         // 检查列
         for col in 0..<3 {
-            if positions[0][col] && positions[1][col] && positions[2][col] {
-                print("game over直線")
+            if (positions[0][col] && positions[1][col] && positions[2][col]) {
                 return true
             }
         }
 
         // 检查对角线
         if (positions[0][0] && positions[1][1] && positions[2][2]) || (positions[0][2] && positions[1][1] && positions[2][0]) {
-            print("game over斜線")
             return true
         }
         return false
     }
 
     func endGame(winner: String) {
-        //gameIsOver = true  // 停止接收触摸事件
-        self.isPaused = true  // 暂停场景
-        //stopTimer()  // 停止所有计时器
         gameIsOver = true
+        self.isPaused = true
 
-        // 显示胜利者信息
         let winLabel = SKLabelNode(text: "\(winner) wins!")
         winLabel.fontColor = SKColor.red
-        
-        winLabel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
         winLabel.fontSize = 40
-        winLabel.zPosition = CGFloat(numberOfTouches+1)
+        winLabel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+        winLabel.zPosition = CGFloat(numberOfTouches + 1)
         addChild(winLabel)
     }
     func resetGameState() {
-        // 清除棋子
+        // 清除所有子节点
         self.removeAllChildren()
 
         // 重置游戏相关的变量
         numberOfTouches = 0
         gameIsOver = false
         self.isPaused = false
-        background?.removeFromParent()
-        boardNode?.removeFromParent()
-        
-         numberOfTouches = 0
-         column=0
-         row=0
-         oCount=0
-         xCount=0
-         gameIsOver = false
-        
-        // 重新设置棋盘
+        oCount = 0
+        xCount = 0
+        oQueue.removeAll()
+        xQueue.removeAll()
+        oPositions = Array(repeating: Array(repeating: false, count: numberOfRows), count: numberOfColumns)
+        xPositions = Array(repeating: Array(repeating: false, count: numberOfRows), count: numberOfColumns)
     }
 
-    func checkForWin(_ positions: [CGPoint]) -> Bool {
-        // 實現勝利條件判斷的邏輯（需要詳細規劃）
-        return false
-    }
-    func setupGameBoard()
-        {
-            background = SKSpriteNode(imageNamed: "OOXXbg")
-            background.position = CGPoint(x: 0, y: 0)
-            background.zPosition = -1 // 確保背景在最底層
-            addChild(background)
-            // 創建棋盤節點
-            let boardSize = CGSize(width: 666, height: 666) // 棋盤大小
-            boardNode = SKSpriteNode(color: .clear, size: boardSize)
-            boardNode.anchorPoint = CGPoint(x:0,y:0)
-            
-            boardNode.position = CGPoint(x: -333, y: -333)  // 调整Y坐标以适应视图顶部
-            addChild(boardNode)
-            // 確保遊戲場景可以接收觸摸事件
-            isUserInteractionEnabled = true
-        }
+    func setupGameBoard() {
+        background = SKSpriteNode(imageNamed: "OOXXbg")
+        background.position = CGPoint(x: 0, y: 0)
+        background.zPosition = -1 // 確保背景在最底層
+        addChild(background)
 
-    func touchDown(atPoint pos : CGPoint) {
-        // 當觸摸按下時觸發
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-        // 當觸摸移動時觸發
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-        // 當觸摸抬起時觸發
+        // 創建棋盤節點
+        let boardSize = CGSize(width: 666, height: 666) // 棋盤大小
+        boardNode = SKSpriteNode(color: .clear, size: boardSize)
+        boardNode.anchorPoint = CGPoint(x: 0, y: 0)
+        boardNode.position = CGPoint(x: -333, y: -333)  // 调整Y坐标以适应视图顶部
+        addChild(boardNode)
+
+        // 確保遊戲場景可以接收觸摸事件
+        isUserInteractionEnabled = true
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+        // 當觸摸移動時觸發
     }
-    
+
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         // 當觸摸結束時觸發
     }
-    
+
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         // 當觸摸取消時觸發
     }
