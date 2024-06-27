@@ -52,11 +52,11 @@ class GameScene: SKScene {
 
             // 添加标签
             let label = SKLabelNode(text: "\(1)")
-            label.fontSize = 20
+            label.fontSize = 15
             label.fontColor = .black
-            label.horizontalAlignmentMode = .left
+            label.horizontalAlignmentMode = .center
             label.verticalAlignmentMode = .top
-            label.position = CGPoint(x: -sprite.size.width / 2 + 10, y: sprite.size.height / 2 - 10)
+            label.position = CGPoint(x: -sprite.size.width / 2 + 105, y: sprite.size.height / 2 - 1)
             label.zPosition = CGFloat(numberOfTouches+1)
             sprite.addChild(label)
 
