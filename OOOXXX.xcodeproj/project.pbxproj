@@ -22,6 +22,7 @@
 		584997C62BD195EB00C65B88 /* OOOXXXTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584997C52BD195EB00C65B88 /* OOOXXXTests.swift */; };
 		584997D02BD195EB00C65B88 /* OOOXXXUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584997CF2BD195EB00C65B88 /* OOOXXXUITests.swift */; };
 		584997D22BD195EB00C65B88 /* OOOXXXUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584997D12BD195EB00C65B88 /* OOOXXXUITestsLaunchTests.swift */; };
+		587B725B2C353D5B003268F6 /* backgroundMusic.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 587B725A2C353D5B003268F6 /* backgroundMusic.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		584997CB2BD195EB00C65B88 /* OOOXXXUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OOOXXXUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		584997CF2BD195EB00C65B88 /* OOOXXXUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OOOXXXUITests.swift; sourceTree = "<group>"; };
 		584997D12BD195EB00C65B88 /* OOOXXXUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OOOXXXUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		587B725A2C353D5B003268F6 /* backgroundMusic.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = backgroundMusic.mp3; path = ../../../Downloads/backgroundMusic.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +116,7 @@
 				584997AD2BD195EA00C65B88 /* GameScene.sks */,
 				584997AF2BD195EA00C65B88 /* Actions.sks */,
 				584997B12BD195EA00C65B88 /* GameScene.swift */,
+				587B725A2C353D5B003268F6 /* backgroundMusic.mp3 */,
 				584997B32BD195EA00C65B88 /* GameViewController.swift */,
 				584997B52BD195EA00C65B88 /* Main.storyboard */,
 				584997B82BD195EB00C65B88 /* Assets.xcassets */,
@@ -257,6 +260,7 @@
 				584997B02BD195EA00C65B88 /* Actions.sks in Resources */,
 				58398D612BF453FF00E182AA /* OOXXbg.png in Resources */,
 				582863F72C0584FC00D0E7EE /* Space.png in Resources */,
+				587B725B2C353D5B003268F6 /* backgroundMusic.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,5 +1,6 @@
 import SpriteKit
 import GameplayKit
+import AVFoundation
 
 class GameScene: SKScene {
     // 定義棋盤節點
@@ -21,14 +22,71 @@ class GameScene: SKScene {
     let numberOfColumns = 3 // 棋盤列數
     var oQueue: [(node: SKSpriteNode, row: Int, col: Int)] = []
     var xQueue: [(node: SKSpriteNode, row: Int, col: Int)] = []
+    
+    var backgroundMusicPlayer: AVAudioPlayer?
 
     override func didMove(to view: SKView) {
         // 設置背景
         setupGameBoard()
+        playBackgroundMusic()
+        addVolumeControlButton()
+    }
+
+    func playBackgroundMusic() {
+        if let musicURL = Bundle.main.url(forResource: "backgroundMusic", withExtension: "mp3") {
+            do {
+                backgroundMusicPlayer = try AVAudioPlayer(contentsOf: musicURL)
+                backgroundMusicPlayer?.numberOfLoops = -1 // 無限循環
+                backgroundMusicPlayer?.play()
+            } catch {
+                print("無法播放背景音樂")
+            }
+        }
+    }
+
+    func addVolumeControlButton() {
+        let volumeUpButton = SKLabelNode(text: "🔊+")
+        volumeUpButton.name = "volumeUpButton"
+        volumeUpButton.fontSize = 40
+        volumeUpButton.position = CGPoint(x: self.frame.minX + 250, y: self.frame.maxY - 150)
+        volumeUpButton.zPosition = 1000
+        addChild(volumeUpButton)
+        
+        let volumeDownButton = SKLabelNode(text: "🔉-")
+        volumeDownButton.name = "volumeDownButton"
+        volumeDownButton.fontSize = 40
+        volumeDownButton.position = CGPoint(x: self.frame.minX + 150, y: self.frame.maxY - 150)
+        volumeDownButton.zPosition = 1000
+        addChild(volumeDownButton)
+    }
+
+    func adjustVolume(up: Bool) {
+        guard let player = backgroundMusicPlayer else { return }
+        
+        if up {
+            player.volume = min(player.volume + 0.1, 1.0) // 增加音量
+        } else {
+            player.volume = max(player.volume - 0.1, 0.0) // 減小音量
+        }
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
+
+        let location = touch.location(in: self)
+        let nodesAtLocation = nodes(at: location)
+        
+        for node in nodesAtLocation {
+            if let nodeName = node.name {
+                if nodeName == "volumeUpButton" {
+                    adjustVolume(up: true)
+                    return
+                } else if nodeName == "volumeDownButton" {
+                    adjustVolume(up: false)
+                    return
+                }
+            }
+        }
 
         if gameIsOver {
             resetGameState()
@@ -36,27 +94,27 @@ class GameScene: SKScene {
             return
         }
 
-        let location = touch.location(in: boardNode)
-        if 0 <= location.x && location.x < boardNode.size.width && 0 <= location.y && location.y < boardNode.size.height {
-            let column = Int(location.x / 222)
-            let row = Int(location.y / 222)
+        let boardLocation = touch.location(in: boardNode)
+        if 0 <= boardLocation.x && boardLocation.x < boardNode.size.width && 0 <= boardLocation.y && boardLocation.y < boardNode.size.height {
+            let column = Int(boardLocation.x / (boardNode.size.width / 3))
+            let row = Int(boardLocation.y / (boardNode.size.height / 3))
 
             if oPositions[row][column] || xPositions[row][column] {
-                return  // 如果该位置已经有棋子，则不进行任何操作
+                return  // 該位置已有棋子則不做任何動作
             }
 
             let imageName = (numberOfTouches % 2 == 0) ? "X.png" : "O.png"
             let sprite = SKSpriteNode(imageNamed: imageName)
-            sprite.position = CGPoint(x: CGFloat(column) * 222 + 111, y: CGFloat(row) * 222 + 111)
+            sprite.position = CGPoint(x: CGFloat(column) * (boardNode.size.width / 3) + (boardNode.size.width / 6), y: CGFloat(row) * (boardNode.size.height / 3) + (boardNode.size.height / 6))
             boardNode.addChild(sprite)
 
-            // 添加标签
+            // 以下是新增放棋子的hint
             let label = SKLabelNode(text: "\(1)")
             label.fontSize = 15
             label.fontColor = .black
             label.horizontalAlignmentMode = .center
             label.verticalAlignmentMode = .top
-            label.position = CGPoint(x: -sprite.size.width / 2 + 105, y: sprite.size.height / 2 - 1)
+            label.position = CGPoint(x: 0, y: sprite.size.height / 2 - 5)
             label.zPosition = CGFloat(numberOfTouches+1)
             sprite.addChild(label)
 
@@ -157,6 +215,7 @@ class GameScene: SKScene {
         winLabel.zPosition = CGFloat(numberOfTouches + 1)
         addChild(winLabel)
     }
+
     func resetGameState() {
         // 清除所有子节点
         self.removeAllChildren()
@@ -185,6 +244,7 @@ class GameScene: SKScene {
         boardNode.anchorPoint = CGPoint(x: 0, y: 0)
         boardNode.position = CGPoint(x: -333, y: -333)  // 调整Y坐标以适应视图顶部
         addChild(boardNode)
+        addVolumeControlButton()
 
         // 確保遊戲場景可以接收觸摸事件
         isUserInteractionEnabled = true
