@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "mach_msg_trap:(null)">
+         <PersistentStrings>
+            <PersistentString
+               value = "numberOfTouches">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GameScene.touchesBegan(_:with:):GameScene.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "oPositions">
+            </PersistentString>
+            <PersistentString
+               value = "label.position">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GameScene.setupGameBoard():GameScene.swift">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
